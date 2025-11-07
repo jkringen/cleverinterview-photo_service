@@ -17,7 +17,7 @@ class PhotoSourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PhotoSource
-        fields = [
+        fields = (
             "id",
             "original",
             "medium",
@@ -27,21 +27,27 @@ class PhotoSourceSerializer(serializers.ModelSerializer):
             "large_2x",
             "portrait",
             "landscape",
-        ]
+        )
 
 
 class PhotographSlimSerializer(serializers.ModelSerializer):
-    """Serializer (slim) for a Photograph model that omits the Photographer field."""
+    """
+    Serializer (slim) for a Photograph model that omits the Photographer field.
+    Fetches the related `source` field for PhotoSource info.
+    """
 
     source = PhotoSourceSerializer(read_only=True)
 
     class Meta:
         model = Photograph
-        fields = ("id", "title", "url", "avg_color", "alt_text", "source")
+        fields = ["id", "title", "url", "avg_color", "alt_text", "source"]
 
 
 class PhotographerLimitedSerializer(serializers.ModelSerializer):
-    """Serializer  (limited) for a Photographer model that omits the photographs field."""
+    """
+    Serializer (limited) for a Photographer model that omits the photographs field.
+    Fetches the related `user` field for the parent User data.
+    """
 
     user = UserPublicSerializer(read_only=True)
 
@@ -51,6 +57,12 @@ class PhotographerLimitedSerializer(serializers.ModelSerializer):
 
 
 class PhotographerSerializer(PhotographerLimitedSerializer):
+    """
+    Serializer for a Photographer model that extends the `PhotographerLimitedSerializer`.
+    Adds an additional fetch for the related `photographs` field to include all Photograph
+    records owned by the Photographer.
+    """
+
     photographs = PhotographSlimSerializer(many=True, read_only=True)
 
     class Meta(PhotographerLimitedSerializer.Meta):
@@ -59,24 +71,17 @@ class PhotographerSerializer(PhotographerLimitedSerializer):
         ]
 
 
-# Full photo (for /photos endpoints)
-class PhotographSerializer(serializers.ModelSerializer):
-    # Avoid recursion by NOT nesting PhotographerSerializer here.
-    # Show just basic photographer info or an ID/slug.
+class PhotographSerializer(PhotographSlimSerializer):
+    """
+    Serializer for a Photograph model that extends the `PhotographSlimSerializer`.
+    Adds an additional fetch for the related `photographer` field to include the
+    link to Photographer information.
+    """
+
     # photographer_id = serializers.IntegerField(source="photographer.id", read_only=True)
     photographer = PhotographerLimitedSerializer(read_only=True)
-    source = PhotoSourceSerializer(read_only=True)
 
-    class Meta:
-        model = Photograph
-        fields = [
-            "id",
-            "title",
-            "url",
-            "avg_color",
-            "alt_text",
+    class Meta(PhotographSlimSerializer.Meta):
+        fields = PhotographSlimSerializer.Meta.fields + [
             "photographer",
-            "source",
-            "date_created",
-            "last_updated",
         ]
