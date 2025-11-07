@@ -5,12 +5,16 @@ from .models import Photograph, Photographer, PhotoSource
 
 
 class UserPublicSerializer(serializers.ModelSerializer):
+    """Serializer for our custom User model."""
+
     class Meta:
         model = get_user_model()
-        fields = ("id", "username", "email")
+        fields = ("id", "username", "email", "first_name", "last_name")
 
 
 class PhotoSourceSerializer(serializers.ModelSerializer):
+    """Serializer for a PhotoSource model."""
+
     class Meta:
         model = PhotoSource
         fields = [
@@ -26,8 +30,9 @@ class PhotoSourceSerializer(serializers.ModelSerializer):
         ]
 
 
-# Slim photo (to embed under Photographer without recursion)
 class PhotographSlimSerializer(serializers.ModelSerializer):
+    """Serializer (slim) for a Photograph model that omits the Photographer field."""
+
     source = PhotoSourceSerializer(read_only=True)
 
     class Meta:
@@ -35,11 +40,31 @@ class PhotographSlimSerializer(serializers.ModelSerializer):
         fields = ("id", "title", "url", "avg_color", "alt_text", "source")
 
 
+class PhotographerLimitedSerializer(serializers.ModelSerializer):
+    """Serializer  (limited) for a Photographer model that omits the photographs field."""
+
+    user = UserPublicSerializer(read_only=True)
+
+    class Meta:
+        model = Photographer
+        fields = ["id", "user", "date_created", "last_updated"]
+
+
+class PhotographerSerializer(PhotographerLimitedSerializer):
+    photographs = PhotographSlimSerializer(many=True, read_only=True)
+
+    class Meta(PhotographerLimitedSerializer.Meta):
+        fields = PhotographerLimitedSerializer.Meta.fields + [
+            "photographs",
+        ]
+
+
 # Full photo (for /photos endpoints)
 class PhotographSerializer(serializers.ModelSerializer):
     # Avoid recursion by NOT nesting PhotographerSerializer here.
     # Show just basic photographer info or an ID/slug.
-    photographer_id = serializers.IntegerField(source="photographer.id", read_only=True)
+    # photographer_id = serializers.IntegerField(source="photographer.id", read_only=True)
+    photographer = PhotographerLimitedSerializer(read_only=True)
     source = PhotoSourceSerializer(read_only=True)
 
     class Meta:
@@ -50,17 +75,8 @@ class PhotographSerializer(serializers.ModelSerializer):
             "url",
             "avg_color",
             "alt_text",
-            "photographer_id",
+            "photographer",
             "source",
             "date_created",
             "last_updated",
         ]
-
-
-class PhotographerSerializer(serializers.ModelSerializer):
-    user = UserPublicSerializer(read_only=True)
-    photographs = PhotographSlimSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Photographer
-        fields = ["id", "user", "photographs", "date_created", "last_updated"]
