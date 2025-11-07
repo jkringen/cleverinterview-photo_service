@@ -88,12 +88,8 @@ def _ensure_photographer_record(data: DataRow) -> Photographer:
     # ensure we have a base Django user
     user_record: "User" = _ensure_user_record(data)
 
-    # make sure we have a Photographer record for this user
-    photographer: Photographer = Photographer.objects.filter(user=user_record).first()
-    if not photographer:
-        photographer = Photographer.objects.create(user=user_record)
-        print(f"Created Photographer: id={photographer.id}")
-    return photographer
+    # return auto-created Photographer record (via post save hook on User model)
+    return Photographer.objects.filter(user=user_record).first()
 
 
 def _add_photograph(data: DataRow, photographer: Photographer) -> Photograph:

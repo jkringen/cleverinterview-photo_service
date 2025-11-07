@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
 from .models import Photograph, Photographer, PhotoSource
 
@@ -36,11 +36,14 @@ class PhotographSlimSerializer(serializers.ModelSerializer):
     Fetches the related `source` field for PhotoSource info.
     """
 
-    source = PhotoSourceSerializer(read_only=True)
+    # source = PhotoSourceSerializer(read_only=True)
+    # Make the nested source writable
+    source = PhotoSourceSerializer(required=False)
 
     class Meta:
         model = Photograph
         fields = ["id", "title", "url", "avg_color", "alt_text", "source"]
+        read_only_fields = ("id", "date_created", "last_updated")
 
 
 class PhotographerLimitedSerializer(serializers.ModelSerializer):
@@ -54,21 +57,6 @@ class PhotographerLimitedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photographer
         fields = ["id", "user", "date_created", "last_updated"]
-
-
-class PhotographerSerializer(PhotographerLimitedSerializer):
-    """
-    Serializer for a Photographer model that extends the `PhotographerLimitedSerializer`.
-    Adds an additional fetch for the related `photographs` field to include all Photograph
-    records owned by the Photographer.
-    """
-
-    photographs = PhotographSlimSerializer(many=True, read_only=True)
-
-    class Meta(PhotographerLimitedSerializer.Meta):
-        fields = PhotographerLimitedSerializer.Meta.fields + [
-            "photographs",
-        ]
 
 
 class PhotographSerializer(PhotographSlimSerializer):
@@ -85,3 +73,11 @@ class PhotographSerializer(PhotographSlimSerializer):
         fields = PhotographSlimSerializer.Meta.fields + [
             "photographer",
         ]
+
+    def create(self, validated_data):
+        print(f"VALIDATED_DATA={validated_data}")
+        source_data = validated_data.pop("source", None)
+        photo = Photograph.objects.create(**validated_data)
+        if source_data:
+            PhotoSource.objects.create(photograph=photo, **source_data)
+        return photo

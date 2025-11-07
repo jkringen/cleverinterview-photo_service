@@ -1,7 +1,7 @@
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.functions import Now
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings
 
 
 class PhotoURLField(models.URLField):
@@ -23,6 +23,9 @@ class Photographer(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True, db_default=Now())
     last_updated = models.DateTimeField(auto_now=True, db_default=Now())
+
+    def __str__(self):
+        return self.user.email
 
 
 class Photograph(models.Model):
@@ -56,3 +59,6 @@ class PhotoSource(models.Model):
     photograph = models.OneToOneField(
         Photograph, on_delete=models.CASCADE, related_name="source"
     )
+
+    def __str__(self):
+        return f"photo.{self.photograph.id}"

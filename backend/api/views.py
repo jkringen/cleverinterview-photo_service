@@ -1,17 +1,18 @@
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from photos.models import Photograph, Photographer
 from photos.serializers import (
     PhotographerLimitedSerializer,
-    PhotographerSerializer,
     PhotographSerializer,
     PhotographSlimSerializer,
 )
+from photos.validators import validate_photograph, ValidatedData
 
 
-class PhotographersList(APIView):
+class PhotographersView(APIView):
     """
     List all photographers, or create a new photographer.
     """
@@ -21,10 +22,15 @@ class PhotographersList(APIView):
         serializer = PhotographerLimitedSerializer(photos, many=True)
         return Response(serializer.data)
 
+    def post(self, request):
+        # body: user_id, photos?
+        # validation: user_id must exist in DB,
+        pass
 
-class PhotographerDetail(APIView):
+
+class PhotographerView(APIView):
     """
-    List all photographers, or create a new photographer.
+    Retrieve, update, or delete a Photographer record.
     """
 
     def get(self, request, photographer_id: int):
@@ -32,10 +38,22 @@ class PhotographerDetail(APIView):
         serializer = PhotographerLimitedSerializer(photo)
         return Response(serializer.data)
 
+    def put(self, request):
+        # full resource update
+        # body: user_id, photos?
+        # validation: user_id must exist in DB,
+        pass
 
-class PhotographerPhotos(APIView):
+    def patch(self, request):
+        # partial resource update
+        # body: user_id, photos?
+        # validation: user_id must exist in DB,
+        pass
+
+
+class PhotographerPhotosView(APIView):
     """
-    List all photographers, or create a new photographer.
+    Retrieve all photos related to the provided `photographer_id`.
     """
 
     def get(self, request, photographer_id: int):
@@ -44,7 +62,7 @@ class PhotographerPhotos(APIView):
         return Response(serializer.data)
 
 
-class PhotoList(APIView):
+class PhotosView(APIView):
     """
     List all photos, or create a new photo.
     """
@@ -54,15 +72,23 @@ class PhotoList(APIView):
         serializer = PhotographSerializer(photos, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
-        serializer = PhotographSerializer(data=request.data)
+    def post(self, request: Request):
+        # validate incoming photograph post data
+        validated_data: ValidatedData = validate_photograph(request.data)
+        if not validated_data.success:
+            return Response(validated_data.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # create Photograph record and return it or the resulting errors
+        serializer = PhotographSerializer(data=validated_data.data.model_dump())
+        photographer = Photographer.objects.filter(
+            id=validated_data.data.photographer_id
+        ).first()
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save(photographer=photographer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class PhotoDetail(APIView):
+class PhotoView(APIView):
     """
     Retrieve, update or delete a Photograph instance.
     """
@@ -71,3 +97,15 @@ class PhotoDetail(APIView):
         photo = Photograph.objects.filter(id=photo_id).first()
         serializer = PhotographSlimSerializer(photo)
         return Response(serializer.data)
+
+    def put(self, request):
+        # full resource update
+        # body: user_id, photos?
+        # validation: user_id must exist in DB,
+        pass
+
+    def patch(self, request):
+        # partial resource update
+        # body: user_id, photos?
+        # validation: user_id must exist in DB,
+        pass
