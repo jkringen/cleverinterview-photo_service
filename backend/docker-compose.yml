@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:18.0-alpine3.22
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: async_job_system
+    volumes:
+      - psql:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d async_job_system"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+  
+  migrate:
+    image: ghcr.io/jkringen/async_job_system/backend:latest
+    command: poetry run alembic upgrade head
+    env_file: 
+      - ./.env
+    # environment:
+    #   DATABASE_URL: ${DATABASE_URL}
+    volumes:
+     - .:/code
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no" 
+  
+  api:
+    image: ghcr.io/jkringen/async_job_system/backend:latest
+    build: .
+    command: bash -c "poetry run gunicorn -b 0.0.0.0:80 --config async_job_system/gunicorn.py async_job_system.api:app --access-logfile -"
+    env_file: 
+      - ./.env
+    # environment:
+    #   DATABASE_URL: ${DATABASE_URL}
+    #   CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+    #   CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+    #   API_JWT_PUBLIC_KEY: ${API_JWT_PUBLIC_KEY}
+    volumes:
+     - .:/code
+    ports:
+      - 8000:80
+    healthcheck:
+      test: curl --fail http://0.0.0.0/api/v1/health || exit 1
+      interval: 1m
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped  
+
+volumes:
+  psql:

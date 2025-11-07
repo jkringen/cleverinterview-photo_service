@@ -1,0 +1,72 @@
+{
+  "/newJob": [
+    { "type": "header.large", "text": "Submit New Job" },
+    { "type": "text", "text": "Kick off background work tailored to your needs. Select a Job type, configure its inputs, and submit—your request will be queued immediately and processed by our workers." },
+    { "type": "header", "text": "<b>How it works:</b>" },
+    {
+      "type": "list",
+      "content": [
+        "<b>Choose Job Type:</b> Pick from the available Jobs in the dropdown. Additional Job details can be found in the table below (including what parameters you need to provide the job).",
+        "<b>Configure Parameters:</b> A configuration panel appears with fields specific to the selected Job. Provide values for required inputs and adjust optional settings as needed.",
+        "<b>Submit:</b> Your job is created and enters <b className='text-blue-500'>PENDING</b> status until a worker starts processing it."
+      ]
+    },
+    { "type": "header", "text": "<b>What happens next:</b>" },
+    {
+      "type": "list",
+      "content": [
+        "When a worker begins processing, the status moves to <b className='text-yellow-300'>STARTED</b>.",
+        "After completion, the status becomes <b className='text-green-400'>SUCCESS</b> or <b className='text-red-400'>FAILED</b>. The <b>result/output payload</b> is stored with the job."
+      ]
+    },
+    { "type": "header", "text": "<b>Notes:</b>" },
+    {
+      "type": "list",
+      "content": [
+        "Validation errors will be highlighted in the form with guidance on how to fix them.",
+        "You can monitor progress anytime from the <b>Jobs Monitoring Dashboard</b>."
+      ]
+    }
+  ],
+  "/jobs": [
+    { "type": "header.large", "text": "Jobs Monitoring Dashboard" },
+    {
+      "type": "text",
+      "text": "Track every job from submission to completion. Filter, search, and drill into details without leaving the page."
+    },
+    { "type": "header", "text": "<b>At a glance:</b>" },
+    {
+      "type": "list",
+      "content": [
+        "A live table lists all jobs (new and historical).",
+        "Each row shows <b>ID</b>, <b>Job Type</b>, <b>Status</b> (<b className='text-blue-500'>PENDING</b> / <b className='text-yellow-300'>STARTED</b> / <b className='text-green-400'>SUCCESS</b> / <b className='text-red-400'>FAILED</b>), <b>Updated At</b>, etc."
+      ]
+    },
+    { "type": "header", "text": "<b>Working with the dashboard:</b>" },
+    {
+      "type": "list",
+      "content": [
+        "<b>Select a Job</b>: Click any row to open a <b>pop-over</b> with full details—inputs, parameters, timestamps, worker info (when available), and the <b>complete result payload</b> (including large JSON).",
+        "<b>Filter & Search</b>: Narrow by status, job type, or any visible field to find exactly what you need.",
+        "<b>Auto-Refresh</b>: The table updates periodically so you always see the latest status. You can also Refresh manually."
+      ]
+    },
+    { "type": "header", "text": "<b>Status lifecycle:</b>" },
+    {
+      "type": "list",
+      "content": [
+        "<b className='text-blue-500'>PENDING</b>: Job is queued and waiting for a worker.",
+        "<b className='text-yellow-300'>STARTED</b>: A worker has picked up the job and is processing it.",
+        "<b className='text-green-400'>SUCCESS</b> / <b className='text-red-400'>FAILED</b>: Processing finished. The result payload is saved with the job for review."
+      ]
+    },
+    { "type": "header", "text": "<b>Notifications & retention:</b>" },
+    {
+      "type": "list",
+      "content": [
+        "Once your job has completed, you'll see the status update on the Jobs Monitoring Dashboard and can view the result, etc.",
+        "<b>Completed jobs remain visible for 1 hour</b> after finishing, then they are purged from the system."
+      ]
+    }
+  ]
+}
