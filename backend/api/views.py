@@ -5,10 +5,10 @@ from rest_framework.views import APIView
 
 from photos.db import (
     DbResult,
+    get_photograph,
     get_photographer,
     get_photographers,
     get_photographs,
-    get_photograph,
     serialize_and_save_photograph,
     update_photograph,
 )
@@ -30,7 +30,7 @@ class PhotographersView(APIView):
 
 class PhotographerView(APIView):
     """
-    Retrieve, update, or delete a Photographer record.
+    View for getting a specific Photographer record.
     """
 
     def get(self, request, photographer_id: int):
@@ -39,18 +39,6 @@ class PhotographerView(APIView):
         if not result.success:
             return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_200_OK)
-
-    def put(self, request):
-        # full resource update
-        # body: user_id, photos?
-        # validation: user_id must exist in DB,
-        pass
-
-    def patch(self, request):
-        # partial resource update
-        # body: user_id, photos?
-        # validation: user_id must exist in DB,
-        pass
 
 
 class PhotographerPhotosView(APIView):
