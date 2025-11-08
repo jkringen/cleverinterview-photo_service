@@ -22,14 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-f9q#i1aje!nl@x$*b562mno_!1(8-w$y7lza+9d+-3^9z#r5d5"
-# SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -49,6 +45,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -58,9 +55,10 @@ MIDDLEWARE = [
 ]
 
 # CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
+#     "http://0.0.0.0:3000",
 # ]
+
+ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "localhost"]
 
 ROOT_URLCONF = "backend.urls"
 
@@ -87,11 +85,13 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DATABASE_NAME"),
+        "USER": os.environ.get("DATABASE_USER"),
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
+        "HOST": os.environ.get("DATABASE_HOST"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -143,7 +143,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

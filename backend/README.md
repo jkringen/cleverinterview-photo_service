@@ -9,6 +9,10 @@ This project is the backend for the Photo Service application and provides the f
 * TODO: admin views
 * TODO: tests
 * TODO: frontend?
+* postgres db, dockerized
+* install script to ensure database & user exists, etc.
+* TODO: mgmt command for db seed?
+* TODO: logging
 
 ## Later TODOs
 - Proper deployment pipeline, ensuring secrets are passed securely

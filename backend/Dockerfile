@@ -6,3 +6,4 @@ WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
 RUN poetry install --only main
 COPY . /code
+RUN poetry run python manage.py collectstatic --noinput
