@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -106,26 +107,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # allows for current and future customizations
 AUTH_USER_MODEL = "photos.User"
 
-# REST_FRAMEWORK = {
-#     "DEFAULT_AUTHENTICATION_CLASSES": [
-#         "rest_framework_simplejwt.authentication.JWTAuthentication",
-#     ],
-#     "DEFAULT_PERMISSION_CLASSES": [
-#         "rest_framework.permissions.IsAuthenticated",  # or loosen per-view
-#     ],
-# }
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+}
 
-# SIMPLE_JWT = {
-#     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
-#     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-#     # "ALGORITHM": "HS256",              # default (uses settings.SECRET_KEY)
-#     # ---- If you want RS256 (public/private key) ----
-#     # "ALGORITHM": "RS256",
-#     # "SIGNING_KEY": open("/path/to/private.pem").read(),
-#     # "VERIFYING_KEY": open("/path/to/public.pem").read(),
-#     # "ROTATE_REFRESH_TOKENS": True,
-#     # "BLACKLIST_AFTER_ROTATION": True,
-# }
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

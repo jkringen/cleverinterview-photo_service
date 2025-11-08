@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from photos.db import (
     DbResult,
@@ -15,7 +16,13 @@ from photos.db import (
 from photos.validators import ValidatedData, validate_photograph
 
 
-class PhotographersView(APIView):
+class ProtectedView(APIView):
+    """Extends the default APIView and applies the IsAuthenticated permmission class."""
+
+    permission_classes = [IsAuthenticated]
+
+
+class PhotographersView(ProtectedView):
     """
     View for Photographers records.
     """
@@ -28,7 +35,7 @@ class PhotographersView(APIView):
         return Response(result.result, status=status.HTTP_200_OK)
 
 
-class PhotographerView(APIView):
+class PhotographerView(ProtectedView):
     """
     View for getting a specific Photographer record.
     """
@@ -41,7 +48,7 @@ class PhotographerView(APIView):
         return Response(result.result, status=status.HTTP_200_OK)
 
 
-class PhotographerPhotosView(APIView):
+class PhotographerPhotosView(ProtectedView):
     """
     Retrieve all photos related to the provided `photographer_id`.
     """
@@ -54,7 +61,7 @@ class PhotographerPhotosView(APIView):
         return Response(result.result, status=status.HTTP_200_OK)
 
 
-class PhotosView(APIView):
+class PhotosView(ProtectedView):
     """
     List all photos, or create a new photo.
     """
@@ -79,7 +86,7 @@ class PhotosView(APIView):
         return Response(result.result, status=status.HTTP_201_CREATED)
 
 
-class PhotoView(APIView):
+class PhotoView(ProtectedView):
     """
     Retrieve, update or delete a Photograph instance.
     """

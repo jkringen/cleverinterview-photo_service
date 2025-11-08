@@ -13,13 +13,6 @@ NameField = Annotated[str, StringConstraints(max_length=50)]
 """Provides constraints for a str field representing a name."""
 
 
-class PhotographerValidator(BaseModel):
-    """Validator for new Photographer payload."""
-
-    model_config = ConfigDict(extra="forbid")
-    user_id: int
-
-
 class PhotoSourceValidator(BaseModel):
     """Validator for PhotoSource payloads."""
 
@@ -40,7 +33,6 @@ class PhotographValidator(BaseModel):
     model_config = ConfigDict(extra="forbid")
     title: str
     url: str
-    # photographer_id: int
     source: PhotoSourceValidator
     avg_color: Optional[str] = None
     alt_text: Optional[str] = None
@@ -76,7 +68,7 @@ class ValidatedData:
     errors: list[dict[str, Any]] | None
 
 
-def validate_photograph(data, is_update: Optional[bool] = False) -> ValidatedData:
+def validate_photograph(data: dict[str, Any], is_update: Optional[bool] = False) -> ValidatedData:
     """Validates incoming new Photograph data and returns the result."""
     validated_data: BaseModel | None = None
     errors: list[dict[str, Any]] | None = None
