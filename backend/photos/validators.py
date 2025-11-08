@@ -4,7 +4,6 @@ from typing import Annotated, Any, Optional
 from pydantic import (
     BaseModel,
     ConfigDict,
-    EmailStr,
     StringConstraints,
     ValidationError,
 )
@@ -47,12 +46,6 @@ class PhotographUpdateValidator(BaseModel):
     source: Optional[PhotoSourceValidator] = None
     avg_color: Optional[str] = None
     alt_text: Optional[str] = None
-
-
-class LoginValidator(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    email: EmailStr
-    password: str
 
 
 @dataclass

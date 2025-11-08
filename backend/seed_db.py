@@ -23,8 +23,6 @@ CSV_FILE = "photos.csv"
 UserModel = get_user_model()
 fake = Faker()
 
-# TODO: once API is flushed out, any pydantic models for validation could be used here?
-
 
 @dataclass
 class DataRow:
@@ -68,9 +66,7 @@ def _ensure_user_record(data: DataRow) -> "User":
         # try to determine a first & last name
         name_chunks: list[str] = data.photographer.split(" ", 1)
         first_name: str = name_chunks[0].strip()
-        last_name: str = (
-            name_chunks[len(name_chunks) - 1].strip() if len(name_chunks) > 1 else ""
-        )
+        last_name: str = name_chunks[len(name_chunks) - 1].strip() if len(name_chunks) > 1 else ""
         # create user record
         user_record: User = UserModel.objects.create_user(
             username=email_addr,

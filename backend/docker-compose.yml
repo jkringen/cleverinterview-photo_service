@@ -17,12 +17,10 @@ services:
       retries: 10
   
   migrate:
-    image: ghcr.io/jkringen/async_job_system/backend:latest
+    image: ghcr.io/jkringen/cleverinterview-photo_service/backend:latest
     command: poetry run alembic upgrade head
     env_file: 
       - ./.env
-    # environment:
-    #   DATABASE_URL: ${DATABASE_URL}
     volumes:
      - .:/code
     depends_on:
@@ -31,16 +29,11 @@ services:
     restart: "no" 
   
   api:
-    image: ghcr.io/jkringen/async_job_system/backend:latest
+    image: ghcr.io/jkringen/cleverinterview-photo_service/backend:latest
     build: .
     command: bash -c "poetry run gunicorn -b 0.0.0.0:80 --config async_job_system/gunicorn.py async_job_system.api:app --access-logfile -"
     env_file: 
       - ./.env
-    # environment:
-    #   DATABASE_URL: ${DATABASE_URL}
-    #   CELERY_BROKER_URL: ${CELERY_BROKER_URL}
-    #   CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-    #   API_JWT_PUBLIC_KEY: ${API_JWT_PUBLIC_KEY}
     volumes:
      - .:/code
     ports:

@@ -3,6 +3,13 @@ This project is the backend for the Photo Service application and provides the f
 
 * Django API server providing APIs for querying photos, photographers, as well as JWT based authentication, etc.
 
+* post_save on User to auto-create Photographer tied to User account
+* docs about seeding DB and taking note of usernames and passwords
+* TODO: readme
+* TODO: admin views
+* TODO: tests
+* TODO: frontend?
+
 ## Later TODOs
 - Proper deployment pipeline, ensuring secrets are passed securely
 - Dev setup improvement: run flask dev server locally, fast reload, etc.

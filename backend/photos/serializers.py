@@ -77,7 +77,6 @@ class PhotographSerializer(PhotographSlimSerializer):
     """
 
     photographer = PhotographerSerializer(read_only=True)
-    # source = PhotoSourceSerializer()
 
     class Meta(PhotographSlimSerializer.Meta):
         # extend base class fields and add `photographer`
@@ -95,7 +94,7 @@ class PhotographSerializer(PhotographSlimSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        # pull nested 'source' off the parent payload
+        # pull nested 'source' off the validated data
         source_data = validated_data.pop("source", None)
 
         # update Photograph fields in general
@@ -103,10 +102,9 @@ class PhotographSerializer(PhotographSlimSerializer):
             setattr(instance, attr, val)
         instance.save()
 
-        # upsert PhotoSource (1–1)
+        # create/update PhotoSource data, if included
         if source_data is not None:
-            src = getattr(instance, "source", None)
-            if src:
+            if src := getattr(instance, "source", None):
                 for attr, val in source_data.items():
                     setattr(src, attr, val)
                 src.save()

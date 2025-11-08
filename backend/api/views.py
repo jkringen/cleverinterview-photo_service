@@ -117,3 +117,8 @@ class PhotoView(ProtectedView):
         if not result.success:
             return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_201_CREATED)
+
+
+class HealthCheckView(APIView):
+    def get(self, request):
+        return Response({"status": "healthy"}, status=status.HTTP_200_OK)
