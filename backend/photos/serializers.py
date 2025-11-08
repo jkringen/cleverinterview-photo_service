@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from django.db import transaction
 
 from .models import Photograph, Photographer, PhotoSource
 
@@ -76,6 +77,7 @@ class PhotographSerializer(PhotographSlimSerializer):
     """
 
     photographer = PhotographerSerializer(read_only=True)
+    # source = PhotoSourceSerializer()
 
     class Meta(PhotographSlimSerializer.Meta):
         # extend base class fields and add `photographer`
@@ -90,3 +92,25 @@ class PhotographSerializer(PhotographSlimSerializer):
         if source_data:
             PhotoSource.objects.create(photograph=photo, **source_data)
         return photo
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        # pull nested 'source' off the parent payload
+        source_data = validated_data.pop("source", None)
+
+        # update Photograph fields in general
+        for attr, val in validated_data.items():
+            setattr(instance, attr, val)
+        instance.save()
+
+        # upsert PhotoSource (1–1)
+        if source_data is not None:
+            src = getattr(instance, "source", None)
+            if src:
+                for attr, val in source_data.items():
+                    setattr(src, attr, val)
+                src.save()
+            else:
+                PhotoSource.objects.create(photograph=instance, **source_data)
+
+        return instance

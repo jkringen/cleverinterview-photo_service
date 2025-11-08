@@ -1,14 +1,7 @@
 # PHOTO SERVICE - BACKEND
 This project is the backend for the Photo Service application and provides the following:
 
-* Flask API server providing APIs for querying users, jobs, and tasks, as well as JWT based authentication, etc.
-* SQLAlchemy + alembic to define database models and provide ORM access to interface with the database
-* Centralized database engine and session management for handling standard task lifecycle
-* Celery & celery beat containers to process any pending tasks / queued jobs
-* Periodic task to clean-up any issue with QueuedJob records
-* Task success/failure hooks to alert frontend directly when a task has completed
-* Database admin panel for exploring postgre database
-* Celery Flower instance for dashboard for Celery system
+* Django API server providing APIs for querying photos, photographers, as well as JWT based authentication, etc.
 
 ## Later TODOs
 - Proper deployment pipeline, ensuring secrets are passed securely

@@ -35,13 +35,24 @@ class PhotoSourceValidator(BaseModel):
 
 
 class PhotographValidator(BaseModel):
-    """Validator for Photograph payloads."""
+    """Validator for creating a new Photograph record."""
 
     model_config = ConfigDict(extra="forbid")
     title: str
     url: str
-    photographer_id: int
+    # photographer_id: int
     source: PhotoSourceValidator
+    avg_color: Optional[str] = None
+    alt_text: Optional[str] = None
+
+
+class PhotographUpdateValidator(BaseModel):
+    """Validator used for updating a Photograph record."""
+
+    model_config = ConfigDict(extra="forbid")
+    title: Optional[str] = None
+    url: Optional[str] = None
+    source: Optional[PhotoSourceValidator] = None
     avg_color: Optional[str] = None
     alt_text: Optional[str] = None
 
@@ -65,12 +76,12 @@ class ValidatedData:
     errors: list[dict[str, Any]] | None
 
 
-def validate_photograph(data) -> ValidatedData:
+def validate_photograph(data, is_update: Optional[bool] = False) -> ValidatedData:
     """Validates incoming new Photograph data and returns the result."""
     validated_data: BaseModel | None = None
     errors: list[dict[str, Any]] | None = None
     try:
-        validated_data = PhotographValidator(**data)
+        validated_data = PhotographUpdateValidator(**data) if is_update else PhotographValidator(**data)
     except ValidationError as e:
         errors = e.errors()
     return ValidatedData(

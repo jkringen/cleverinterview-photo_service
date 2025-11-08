@@ -4,30 +4,28 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from photos.db import (
+    DbResult,
     get_photographer,
     get_photographers,
     get_photographs,
     get_photograph,
     serialize_and_save_photograph,
+    update_photograph,
 )
 from photos.validators import ValidatedData, validate_photograph
 
 
 class PhotographersView(APIView):
     """
-    List all photographers, or create a new photographer.
+    View for Photographers records.
     """
 
     def get(self, request):
+        # return list of all photographer records, returning error if something went wrong
         result = get_photographers()
         if not result.success:
-            return Response(result.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        # body: user_id, photos?
-        # validation: user_id must exist in DB,
-        pass
 
 
 class PhotographerView(APIView):
@@ -36,9 +34,10 @@ class PhotographerView(APIView):
     """
 
     def get(self, request, photographer_id: int):
-        result = get_photographer(photographer_id)
+        # get and return photographer by ID, returning error if something went wrong
+        result: DbResult = get_photographer(photographer_id)
         if not result.success:
-            return Response(result.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_200_OK)
 
     def put(self, request):
@@ -60,9 +59,10 @@ class PhotographerPhotosView(APIView):
     """
 
     def get(self, request, photographer_id: int):
-        result = get_photographs(photographer_id=photographer_id)
+        # return all photographs by specific Photographer, returning error if something went wrong
+        result: DbResult = get_photographs(photographer_id=photographer_id)
         if not result.success:
-            return Response(result.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_200_OK)
 
 
@@ -72,9 +72,10 @@ class PhotosView(APIView):
     """
 
     def get(self, request):
-        result = get_photographs()
+        # return all photograph records, returning error if something went wrong
+        result: DbResult = get_photographs()
         if not result.success:
-            return Response(result.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_200_OK)
 
     def post(self, request: Request):
@@ -84,9 +85,9 @@ class PhotosView(APIView):
             return Response(validated_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # create Photograph record and return it or the resulting errors
-        result = serialize_and_save_photograph(validated_data)
+        result: DbResult = serialize_and_save_photograph(validated_data)
         if not result.success:
-            return Response(result.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_201_CREATED)
 
 
@@ -96,19 +97,28 @@ class PhotoView(APIView):
     """
 
     def get(self, request, photo_id: int):
-        result = get_photograph(photo_id)
+        # get photograph record by provided ID, returning error if something went wrong
+        result: DbResult = get_photograph(photo_id)
         if not result.success:
-            return Response(result.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(result.errors, status=result.http_code)
         return Response(result.result, status=status.HTTP_200_OK)
 
-    def put(self, request):
-        # full resource update
-        # body: user_id, photos?
-        # validation: user_id must exist in DB,
-        pass
+    def put(self, request, photo_id: int):
+        # update photograph with provided data
+        return self._update_photograph(request, photo_id)
 
-    def patch(self, request):
-        # partial resource update
-        # body: user_id, photos?
-        # validation: user_id must exist in DB,
-        pass
+    def patch(self, request, photo_id: int):
+        # update photograph with provided data
+        return self._update_photograph(request, photo_id)
+
+    def _update_photograph(self, request, photo_id: int):
+        # validate incoming photograph update data
+        validated_data: ValidatedData = validate_photograph(request.data, is_update=True)
+        if not validated_data.success:
+            return Response(validated_data.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # update Photograph record and return it or the resulting errors
+        result: DbResult = update_photograph(photo_id, validated_data)
+        if not result.success:
+            return Response(result.errors, status=result.http_code)
+        return Response(result.result, status=status.HTTP_201_CREATED)
