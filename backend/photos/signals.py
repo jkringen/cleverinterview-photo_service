@@ -18,7 +18,6 @@ def _ensure_photographer_record(user_record: "User") -> Photographer:
     photographer: Photographer = Photographer.objects.filter(user=user_record).first()
     if not photographer:
         photographer = Photographer.objects.create(user=user_record)
-        print(f"Created Photographer: id={photographer.id}")
     return photographer
 
 
@@ -27,6 +26,6 @@ def on_user_created(sender, instance: "User", created: bool, **kwargs):
     """Custom post_save hook for User model, used to ensure Photographer records exist and are tied to users."""
     if not created:
         return
-    print("USER HAS BEEN CREATED")
+
     # ensure a photographer record exists for this user
     _ensure_photographer_record(instance)

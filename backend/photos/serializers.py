@@ -36,17 +36,25 @@ class PhotographSlimSerializer(serializers.ModelSerializer):
     Fetches the related `source` field for PhotoSource info.
     """
 
-    # source = PhotoSourceSerializer(read_only=True)
-    # Make the nested source writable
+    # Link in nested `source` field as writable (and not required)
     source = PhotoSourceSerializer(required=False)
+    photographer_id = serializers.IntegerField(source="photographer.id", read_only=True)
 
     class Meta:
         model = Photograph
-        fields = ["id", "title", "url", "avg_color", "alt_text", "source"]
-        read_only_fields = ("id", "date_created", "last_updated")
+        fields = [
+            "id",
+            "title",
+            "url",
+            "avg_color",
+            "alt_text",
+            "source",
+            "photographer_id",
+        ]
+        read_only_fields = ("id", "date_created", "last_updated", "photographer_id")
 
 
-class PhotographerLimitedSerializer(serializers.ModelSerializer):
+class PhotographerSerializer(serializers.ModelSerializer):
     """
     Serializer (limited) for a Photographer model that omits the photographs field.
     Fetches the related `user` field for the parent User data.
@@ -63,19 +71,20 @@ class PhotographSerializer(PhotographSlimSerializer):
     """
     Serializer for a Photograph model that extends the `PhotographSlimSerializer`.
     Adds an additional fetch for the related `photographer` field to include the
-    link to Photographer information.
+    link to Photographer information. Also auto-creates PhotoSource record if
+    created Photograph data includes source info.
     """
 
-    # photographer_id = serializers.IntegerField(source="photographer.id", read_only=True)
-    photographer = PhotographerLimitedSerializer(read_only=True)
+    photographer = PhotographerSerializer(read_only=True)
 
     class Meta(PhotographSlimSerializer.Meta):
+        # extend base class fields and add `photographer`
         fields = PhotographSlimSerializer.Meta.fields + [
             "photographer",
         ]
 
     def create(self, validated_data):
-        print(f"VALIDATED_DATA={validated_data}")
+        # check for optional `source` data and auto-create PhotoSource record if defined
         source_data = validated_data.pop("source", None)
         photo = Photograph.objects.create(**validated_data)
         if source_data:
